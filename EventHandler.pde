@@ -41,7 +41,7 @@ synchronized public void handleButtonEvents(GButton button, GEvent event){
         //delete the saved file
         deleteCurrentFile();
       }
-      if(status == "paused"){
+      else if(status == "paused"){
         //retract counter
         sessionCount--;
         if(sessionCount >= 0){

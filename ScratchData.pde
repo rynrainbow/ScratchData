@@ -9,8 +9,8 @@ final String AUDIOEXT = ".wav";
 final String DELIMITER = "_";
 final String DIRDELIM = "/";
 final String SAVEPATH = "/Users/rylan.reborn/Processing/ScratchData/Data Collection";
-final String[] GESTURES = {"snap", "aflick", "kflick", "nkclk", "claw"}; 
-final String[] SHORTHAND = {"snp", "aflk", "kflk", "nkk", "clw"};
+final String[] GESTURES = {"indexf", "pinch", "flick", "kclick", "nclick", "frub", "claw", "snap", "aflick", "kflick", "nkclk"}; 
+final String[] SHORTHAND = {"idf","pch","flk","kclk","nclk","frb","clw","snp", "aflk", "kflk", "nkk"};
 final int NSESSIONS = 2;
 
 PFont light;
