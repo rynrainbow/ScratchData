@@ -1,7 +1,8 @@
 import g4p_controls.*;
 import ddf.minim.*;
 import java.io.*;
-import processing.sound.*;
+//import processing.sound.*;
+import processing.net.*;
 
 // for progressing
 final int DURATION = 30000; // 30 seconds
@@ -20,9 +21,17 @@ ArrayList<String> sessionList;
 int sessionCount = 0;  // act as index of sessionList
 
 int pageIdx;
-Minim minim;
-AudioInput in;
-AudioRecorder recorder;
+Server mServer;
+int PORT = 2333;
+String HOST = "192.168.0.162";
+Client mESP32 = null;
+boolean start;
+ArrayList<Integer> dataRec;
+
+//Minim minim;
+//AudioInput in;
+//AudioRecorder recorder;
+
 String colPath;
 String userTag;
 
@@ -41,9 +50,17 @@ public void setup(){
   // init sessionList
   initSessionList();
   
+  // config WIFI
+  mServer = new Server(this, PORT, HOST);
+  while(mESP32 != null){
+    mESP32 = mServer.available();
+  }
+  start = false;
+  dataRec = new ArrayList<Integer>();
+  
   // config Audio input
-  minim = new Minim(this);
-  in = minim.getLineIn(Minim.MONO, 9600, 96000, 16);  // a big buffer size?
+  //minim = new Minim(this);
+  //in = minim.getLineIn(Minim.MONO, 9600, 96000, 16);  // a big buffer size?
   
   // init all controllers
   initAllControls();
@@ -74,8 +91,9 @@ public void timerCheck(){
   if(status == "ongoing"){
     timeElapsed = millis() - timeStamp;
     if(timeElapsed > DURATION){
-        recorder.endRecord();
-        recorder.save();
+        //recorder.endRecord();
+        //recorder.save();
+        start = false;
         status= "paused";
         sessionCount++;
         timeElapsed = 0;

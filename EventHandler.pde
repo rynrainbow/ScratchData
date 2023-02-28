@@ -22,10 +22,14 @@ synchronized public void handleButtonEvents(GButton button, GEvent event){
     if(button == rec_resume){
       if(status == "paused" && sessionCount < sessionList.size()){
         status = "ongoing";
-        String fileName = colPath + DIRDELIM + sessionList.get(sessionCount) + AUDIOEXT;
-        recorder = minim.createRecorder(in, fileName);
-        recorder.beginRecord();
+        //String fileName = colPath + DIRDELIM + sessionList.get(sessionCount) + AUDIOEXT;
+        //recorder = minim.createRecorder(in, fileName);
+        //recorder.beginRecord();
         
+        // create and start recording thread
+        // start recording
+        start = true;
+        thread("recording");
         //set up a new timer
         timeStamp = millis();
       }
@@ -33,8 +37,11 @@ synchronized public void handleButtonEvents(GButton button, GEvent event){
     if(button == rec_restart){
       if(status == "ongoing"){
         //clean finish recorder's process
-        recorder.endRecord();
-        recorder.save();
+        //recorder.endRecord();
+        //recorder.save();
+        
+        //stop recording
+        start = false;
         //reset some variables
         status = "paused";
         timeElapsed = 0;
@@ -60,4 +67,25 @@ void deleteCurrentFile(){
   String fileName = colPath + DIRDELIM + sessionList.get(sessionCount) + AUDIOEXT;
   File toBeDeleted = new File(fileName);
   if(toBeDeleted.exists()) toBeDeleted.delete();
+}
+
+void recording(){
+    mESP32.clear(); // clear all unusable data
+    while(start){
+      byte[] read = new byte[1024];  // may need to increase??
+      int count = mESP32.readBytes(read);
+      convertToInt(read, count);
+  }
+  //TODO: store the data into wav file
+  
+}
+
+// TODO: synchronization with displayshape()
+void convertToInt(byte[] bytes, int count){
+  if(count > 0){ 
+    for(int i=0; i<bytes.length; i+=2){
+      Integer parsed = bytes[i] << 8 + bytes[i + 1];
+      dataRec.add(parsed);
+    }
+  }
 }

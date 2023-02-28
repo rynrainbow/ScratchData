@@ -81,12 +81,16 @@ void displayShape(){
   noFill();
   beginShape();
   //float[] monoPiece = in.left.toArray();
-  for(int i = 0; i < in.bufferSize(); i+=2)
-  {
-    vertex(
-      map(i, 0, in.bufferSize(), 0.2*width, 0.8*width),
-      map(in.left.get(i), -0.07, 0.07, height*0.25, height*0.75)
-    );
-  }
+  
+  //TODO: use dataRec to plot
+  //TODO: synchronization with recording()
+  
+  //for(int i = 0; i < in.bufferSize(); i+=2)
+  //{
+  //  vertex(
+  //    map(i, 0, in.bufferSize(), 0.2*width, 0.8*width),
+  //    map(in.left.get(i), -0.07, 0.07, height*0.25, height*0.75)
+  //  );
+  //}
   endShape();
 }
