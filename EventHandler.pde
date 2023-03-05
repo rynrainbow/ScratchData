@@ -1,3 +1,11 @@
+import javax.sound.sampled.AudioFileFormat;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+
 public void handleTextEvents(GEditableTextControl textcontrol, GEvent event){
 }
 
@@ -15,14 +23,14 @@ synchronized public void handleButtonEvents(GButton button, GEvent event){
       pageIdx = 1;
       welcomePage.setVisible(false);
       recordPage.setVisible(true);
-      status = "paused";
+      //status = "paused";
       sessionCount = 0;
       mProgressBar = new ProgressBar(10, 20, 960, 10, sessionList.size(), SHORTHAND);
     }
     if(button == rec_resume){
-      if(status == "paused" && sessionCount < sessionList.size()){
+      if(status.equals("paused") && sessionCount < sessionList.size()){
         status = "ongoing";
-        //String fileName = colPath + DIRDELIM + sessionList.get(sessionCount) + AUDIOEXT;
+        fileName = colPath + DIRDELIM + sessionList.get(sessionCount) + AUDIOEXT;
         //recorder = minim.createRecorder(in, fileName);
         //recorder.beginRecord();
         
@@ -35,7 +43,7 @@ synchronized public void handleButtonEvents(GButton button, GEvent event){
       }
     }
     if(button == rec_restart){
-      if(status == "ongoing"){
+      if(status.equals("ongoing")){
         //clean finish recorder's process
         //recorder.endRecord();
         //recorder.save();
@@ -46,9 +54,10 @@ synchronized public void handleButtonEvents(GButton button, GEvent event){
         status = "paused";
         timeElapsed = 0;
         //delete the saved file
-        deleteCurrentFile();
+        //ensure the recording finishes first
+        while(!deleteCurrentFile());
       }
-      else if(status == "paused"){
+      else if(status.equals("paused")){
         //retract counter
         sessionCount--;
         if(sessionCount >= 0){
@@ -63,29 +72,48 @@ synchronized public void handleButtonEvents(GButton button, GEvent event){
   }
 }
 
-void deleteCurrentFile(){
+boolean deleteCurrentFile(){
   String fileName = colPath + DIRDELIM + sessionList.get(sessionCount) + AUDIOEXT;
   File toBeDeleted = new File(fileName);
-  if(toBeDeleted.exists()) toBeDeleted.delete();
+  if(toBeDeleted.exists()) {
+    toBeDeleted.delete();
+    return true;
+  }
+  else return false;
 }
 
 void recording(){
-    mESP32.clear(); // clear all unusable data
-    while(start){
-      byte[] read = new byte[1024];  // may need to increase??
-      int count = mESP32.readBytes(read);
-      convertToInt(read, count);
+  mESP32.clear(); // clear all unusable data
+  dataRec.clear();  // clear old data
+  while(start){
+    byte[] read = new byte[1024];  // may need to increase??
+    int count = mESP32.readBytes(read);
+    // synchronization with displayshape()
+    synchronized (lock){
+      savingBytes(read, count);
+    }
   }
-  //TODO: store the data into wav file
+  // convert back to byte array
+  byte[] byteBuffer = new byte[dataRec.size()];
+  for(int i=0; i<dataRec.size(); i++) byteBuffer[i] = dataRec.get(i);
   
+  //TODO: store the data into wav file
+  try{
+    File out = new File(fileName); // use the file nanme determined by button callback function
+    AudioFormat format = new AudioFormat((float)sampleRate, bitWidth, channelNum, signed, bigEndian); // 
+    ByteArrayInputStream bais = new ByteArrayInputStream(byteBuffer);
+    AudioInputStream audioInputStream = new AudioInputStream(bais, format, (int)(dataRec.size()/2));  // sample length of the data
+    AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, out);
+    audioInputStream.close();
+  }catch(Exception e){
+    print(e.toString());
+  }
 }
 
-// TODO: synchronization with displayshape()
-void convertToInt(byte[] bytes, int count){
+void savingBytes(byte[] bytes, int count){
   if(count > 0){ 
-    for(int i=0; i<bytes.length; i+=2){
-      Integer parsed = bytes[i] << 8 + bytes[i + 1];
-      dataRec.add(parsed);
+    for(int i=0; i<count; i++){
+      dataRec.add(bytes[i]);
     }
   }
 }

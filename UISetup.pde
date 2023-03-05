@@ -66,25 +66,45 @@ public void drawRecord(){
   text("session time: "+ transformed, 850, 470);
   
   // display wave form
-  if(status == "ongoing"){
+  if(status.equals("ongoing")){
     displayShape();
-    strokeWeight(1.5);
-    stroke(0, 100, 200);
-    line(0.2*width, 220, 0.8*width, 220);  // low bound
-    line(0.2*width, 100, 0.8*width, 100);  // high bound
+    //strokeWeight(1.5);
+    //stroke(0, 100, 200);
+    //line(0.2*width, 220, 0.8*width, 220);  // low bound
+    //line(0.2*width, 100, 0.8*width, 100);  // high bound
   }
 }
 
 void displayShape(){
   stroke(0);
-  strokeWeight(1);
+  strokeWeight(1.5);
   noFill();
-  beginShape();
-  //float[] monoPiece = in.left.toArray();
-  
-  //TODO: use dataRec to plot
+  //TODO: parse dataRec to plot
   //TODO: synchronization with recording()
+  synchronized (lock){
+    int bufferSize = dataRec.size();
+    if(bufferSize > (plotSize * 2)){ // 16bit int
+      for(int i=0; i < plotSize; i++){
+        byte MSB = dataRec.get(bufferSize - 2 * (plotSize - i));
+        byte LSB = dataRec.get(bufferSize - 2 * (plotSize - i) + 1);
+        dataPlot[i] = ((MSB & 0xff)<< 8) + (LSB & 0xff);   // to get unsigned int!!!
+      }
+    }
+  }
   
+  // draw a incomplete dataPlot array?
+  beginShape();  
+  for(int i = 0; i< plotSize; i++){
+    //println(dataPlot[i]);
+    //println(map(dataPlot[i], 0, 3000, height*0.3, height*0.7));
+    vertex(
+      map(i, 0, plotSize, 0.1*width, 0.9*width),
+      map(dataPlot[i], 0, 3000, height*0.3, height*0.7)
+    );
+  }
+  endShape();
+  
+  //float[] monoPiece = in.left.toArray();
   //for(int i = 0; i < in.bufferSize(); i+=2)
   //{
   //  vertex(
@@ -92,5 +112,4 @@ void displayShape(){
   //    map(in.left.get(i), -0.07, 0.07, height*0.25, height*0.75)
   //  );
   //}
-  endShape();
 }
