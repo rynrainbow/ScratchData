@@ -1,3 +1,11 @@
+import javax.sound.sampled.AudioFileFormat;
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+
 public void handleTextEvents(GEditableTextControl textcontrol, GEvent event){
 }
 
@@ -34,28 +42,36 @@ synchronized public void handleButtonEvents(GButton button, GEvent event){
       status = "paused";
     }
     if(button == rec_resume){
-      if(status == "paused" && trialCount < NTRIALS){
+      if(status.equals("paused") && trialCount < NTRIALS){
         status = "ongoing";
-        String fileName = colPath + DIRDELIM + currentGest + trialCount + AUDIOEXT;
-        recorder = minim.createRecorder(in, fileName);
-        recorder.beginRecord();
+        fileName = colPath + DIRDELIM + currentGest + trialCount + AUDIOEXT;
+        //recorder = minim.createRecorder(in, fileName);
+        //recorder.beginRecord();
         
+        // create and start recording thread
+        // start recording
+        start = true;
+        thread("recording");
         //set up a new timer
         timeStamp = millis();
       }
     }
     if(button == rec_restart){
-      if(status == "ongoing"){
+      if(status.equals("ongoing")){
         //clean finish recorder's process
-        recorder.endRecord();
-        recorder.save();
+        //recorder.endRecord();
+        //recorder.save();
+        
+        //stop recording
+        start = false;
         //reset some variables
         status = "paused";
         timeElapsed = 0;
         //delete the saved file
-        deleteCurrentFile();
+        //ensure the recording finishes first
+        while(!deleteCurrentFile());
       }
-      else if(status == "paused"){
+      else if(status.equals("paused")){
         //retract counter
         trialCount--;
         if(trialCount >= 0){
@@ -86,8 +102,48 @@ synchronized public void handleButtonEvents(GButton button, GEvent event){
   }
 }
 
-void deleteCurrentFile(){
+boolean deleteCurrentFile(){
   String fileName = colPath + DIRDELIM + currentGest + trialCount + AUDIOEXT;
   File toBeDeleted = new File(fileName);
-  if(toBeDeleted.exists()) toBeDeleted.delete();
+  if(toBeDeleted.exists()) {
+    toBeDeleted.delete();
+    return true;
+  }
+  else return false;
+}
+
+void recording(){
+  mESP32.clear(); // clear all unusable data
+  dataRec.clear();  // clear old data
+  while(start){
+    byte[] read = new byte[1024];  // may need to increase??
+    int count = mESP32.readBytes(read);
+    // synchronization with displayshape()
+    synchronized (lock){
+      savingBytes(read, count);
+    }
+  }
+  // convert back to byte array
+  byte[] byteBuffer = new byte[dataRec.size()];
+  for(int i=0; i<dataRec.size(); i++) byteBuffer[i] = dataRec.get(i);
+  
+  //TODO: store the data into wav file
+  try{
+    File out = new File(fileName); // use the file nanme determined by button callback function
+    AudioFormat format = new AudioFormat((float)sampleRate, bitWidth, channelNum, signed, bigEndian); // 
+    ByteArrayInputStream bais = new ByteArrayInputStream(byteBuffer);
+    AudioInputStream audioInputStream = new AudioInputStream(bais, format, (int)(dataRec.size()/2));  // sample length of the data
+    AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, out);
+    audioInputStream.close();
+  }catch(Exception e){
+    print(e.toString());
+  }
+}
+
+void savingBytes(byte[] bytes, int count){
+  if(count > 0){ 
+    for(int i=0; i<count; i++){
+      dataRec.add(bytes[i]);
+    }
+  }
 }

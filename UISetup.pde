@@ -47,6 +47,7 @@ public void initOthers(){
   // random generators here
   // init a gesture order
   gestOrder = new ArrayList<Integer>();
-  for(int i=0; i<GESTURES.length; i++) gestOrder.add(i);
+  for(int i=1; i<GESTURES.length; i++) gestOrder.add(i);
   Collections.shuffle(gestOrder);
+  gestOrder.add(0, 0); // guarantee to collect background first
 }

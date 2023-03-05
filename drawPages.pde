@@ -26,10 +26,14 @@ public void drawLearn(){
   // rotate the image by 90 degree
   imageMode(CENTER);
   translate(width/2, height/2);
-  rotate(PI/2);
-  image(myMovie, 0, 0, 400, 300);
-  // reverse the operations, otherwise the latter drawing may fail
-  rotate(-PI/2);
+  if(currentGest != "NK_flick" && currentGest != "NK_click"){
+    rotate(PI/2);
+    image(myMovie, 0, 0, 400, 300);
+    // reverse the operations, otherwise the latter drawing may fail
+    rotate(-PI/2);
+  }else{
+    image(myMovie, 0, 0, 300, 400);
+  }
   translate(-width/2, -height/2);
 }
 
@@ -63,24 +67,48 @@ public void drawRecord(){
   // display wave form
   if(status == "ongoing"){
     displayShape();
-    strokeWeight(1.5);
-    stroke(0, 100, 200);
-    line(0.2*width, 220, 0.8*width, 220);  // low bound
-    line(0.2*width, 100, 0.8*width, 100);  // high bound
+    //strokeWeight(1.5);
+    //stroke(0, 100, 200);
+    //line(0.2*width, 220, 0.8*width, 220);  // low bound
+    //line(0.2*width, 100, 0.8*width, 100);  // high bound
   }
 }
 
 void displayShape(){
   stroke(0);
-  strokeWeight(1);
+  strokeWeight(1.5);
   noFill();
-  beginShape();
-  //float[] monoPiece = in.left.toArray();
-  for(int i = 0; i < in.bufferSize(); i+=2)
-  {
+  
+  //beginShape();
+  ////float[] monoPiece = in.left.toArray();
+  //for(int i = 0; i < in.bufferSize(); i+=2)
+  //{
+  //  vertex(
+  //    map(i, 0, in.bufferSize(), 0.2*width, 0.8*width),
+  //    map(in.left.get(i), -0.07, 0.07, height*0.25, height*0.75)
+  //  );
+  //}
+  //endShape();
+  
+  synchronized (lock){
+    int bufferSize = dataRec.size();
+    if(bufferSize > (plotSize * 2)){ // 16bit int
+      for(int i=0; i < plotSize; i++){
+        byte MSB = dataRec.get(bufferSize - 2 * (plotSize - i));
+        byte LSB = dataRec.get(bufferSize - 2 * (plotSize - i) + 1);
+        dataPlot[i] = ((MSB & 0xff)<< 8) + (LSB & 0xff);   // to get unsigned int!!!
+      }
+    }
+  }
+  
+  // draw a incomplete dataPlot array?
+  beginShape();  
+  for(int i = 0; i< plotSize; i++){
+    //println(dataPlot[i]);
+    //println(map(dataPlot[i], 0, 3000, height*0.3, height*0.7));
     vertex(
-      map(i, 0, in.bufferSize(), 0.2*width, 0.8*width),
-      map(in.left.get(i), -0.07, 0.07, height*0.25, height*0.75)
+      map(i, 0, plotSize, 0.1*width, 0.9*width),
+      map(dataPlot[i], 500, 3000, height*0.3, height*0.7)
     );
   }
   endShape();
@@ -94,47 +122,52 @@ void drawEnd(){
 }
 
 String instructionCompose(String gest){
-  String fingers = gest.split("_", 0)[0];
-  String action = gest.split("_", 0)[1];
-  String thumb = "";
-  String other = "";
-  switch(fingers.substring(0, 1)){
-    case "K": 
-      thumb = "knuckle";
-      break;
-    case "N":
-      thumb = "Nail";
-      break;
-    case "P":
-      thumb = "Pad";
-    default:
-      break;
+  if(gest.equals("Background")){
+    return "Move your hand(thumb) freely with no interactions. Avoid bending your thumb's remote knuckle.";
   }
-  switch(fingers.substring(1, 2)){
-    case "K": 
-      other = "knuckle";
-      break;
-    case "N":
-      other = "Nail";
-      break;
-    case "P":
-      other = "Pad";
-    default:
-      break;
+  else{
+    String fingers = gest.split("_", 0)[0];
+    String action = gest.split("_", 0)[1];
+    String thumb = "";
+    String other = "";
+    switch(fingers.substring(0, 1)){
+      case "K": 
+        thumb = "knuckle";
+        break;
+      case "N":
+        thumb = "Nail";
+        break;
+      case "P":
+        thumb = "Pad";
+      default:
+        break;
+    }
+    switch(fingers.substring(1, 2)){
+      case "K": 
+        other = "knuckle";
+        break;
+      case "N":
+        other = "Nail";
+        break;
+      case "P":
+        other = "Pad";
+      default:
+        break;
+    }
+    String general = String.format("It is done by interaction of two parts on your hand - thumb's %s and another finger's %s", thumb, other);
+    String how = "";
+    switch(action){
+      case "rub":
+        how = "Please rub the two parts gently, making a friction sound.";
+        break;
+      case "flick":
+        how = "Please flick promptly, making a sound of burst.";
+        break;
+      case "click":
+        how = "Please make the two parts collide, making a clicking sound.";
+      default:
+        break;
+    }
+    return general + "\n" + how;
   }
-  String general = String.format("It is done by interaction of two parts on your hand - thumb's %s and another finger's %s", thumb, other);
-  String how = "";
-  switch(action){
-    case "rub":
-      how = "Please rub the two parts gently, making a friction sound.";
-      break;
-    case "flick":
-      how = "Please flick promptly, making a sound of burst.";
-      break;
-    case "click":
-      how = "Please make the two parts collide, making a clicking sound.";
-    default:
-      break;
-  }
-  return general + "\n" + how;
 }

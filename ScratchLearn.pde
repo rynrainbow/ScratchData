@@ -1,26 +1,53 @@
 import g4p_controls.*;
 import ddf.minim.*;
 import java.io.*;
-import processing.sound.*;
+//import processing.sound.*;
 import processing.video.*;
 import java.util.*;
+import processing.net.*;
 
 // for progressing
-Minim minim;
-AudioInput in;
-AudioRecorder recorder;
+//Minim minim;
+//AudioInput in;
+//AudioRecorder recorder;
+
+// network related
+Server mServer;
+int PORT = 2333;
+String HOST = "192.168.0.162";
+Client mESP32 = null;
+boolean start;
+
+// audio data related
+ArrayList<Byte> dataRec;
+int sampleRate = 12000;
+int bitWidth = 16;
+int channelNum = 1;
+boolean signed = true;
+boolean bigEndian = true;
+String fileName= "";
+
+// UI related
+int timeStamp;
+int timeElapsed;
+//ArrayList<String> sessionList;
+int trialCount = 0;  // counting how many trials have been done
+ProgressBar mProgressBar;
+String status;
+int plotSize = sampleRate / 2;
+int[] dataPlot;
 Movie myMovie;
+
 final int DURATION = 20000; // 20 seconds
 final String AUDIOEXT = ".wav";
 final String VIDEOEXT = ".mp4";
 final String DELIMITER = "_";
 final String DIRDELIM = "/";
 final String SAVEPATH = "/Users/rylan.reborn/Processing/ScratchLearn/Data Collection";
-final String[] GESTURES = {"KK_rub", "KK_flick", "KK_click", "KN_rub", "KN_flick", "KN_click",
-                           "KP_rub", "KP_flick", "KP_click", "NK_rub", "NK_flick", "NK_click",
-                           "NN_rub", "NN_flick", "NN_click", "NP_rub", "NP_flick", "NP_click",
-                           "PK_rub", "PK_flick", "PK_click", "PN_rub", "PN_flick", "PN_click",
-                           "PP_rub", "PP_flick", "PP_click"}; 
+final String[] GESTURES = {"Background", "KN_flick", "KN_click", "KP_rub",
+                          "KP_click", "NN_rub", "NN_click", "NP_rub", "NP_flick", 
+                          "NP_click", "PK_rub", "PK_click", "PN_rub", "PN_flick", 
+                          "PN_click", "PP_rub", "PP_flick", "PP_click"}; 
 //final String[] SHORTHAND = {"idf", "snp", "aflk"};
 final int NTRIALS = 1;
 PFont light;
@@ -33,12 +60,8 @@ int pageIdx;
 String colPath;
 String userTag;
 
-int timeStamp;
-int timeElapsed;
-//ArrayList<String> sessionList;
-int trialCount = 0;  // counting how many trials have been done
-ProgressBar mProgressBar;
-String status;
+// a lock between data collection and plotting
+Object lock = new Object();
 
 public void setup(){
   size(1000, 700);
@@ -49,10 +72,21 @@ public void setup(){
   
   // init sessionList
   //initSessionList();
-  
   // config Audio input
-  minim = new Minim(this);
-  in = minim.getLineIn(Minim.MONO, 9600, 96000, 16);  // a big buffer size?
+  //minim = new Minim(this);
+  //in = minim.getLineIn(Minim.MONO, 9600, 96000, 16);  // a big buffer size?
+  
+  // config WIFI
+  mServer = new Server(this, PORT, HOST);
+  while(mESP32 == null){
+    mESP32 = mServer.available();
+  }
+  start = false;
+  
+  // config data collection and plotting
+  dataRec = new ArrayList<Byte>(0);
+  dataPlot = new int[plotSize];
+  status = "paused";
   
   // init all controllers
   initAllControls();
@@ -76,11 +110,12 @@ public void draw(){
 }
 
 public void timerCheck(){
-  if(status == "ongoing"){
+  if(status.equals("ongoing")){
     timeElapsed = millis() - timeStamp;
     if(timeElapsed > DURATION){
-        recorder.endRecord();
-        recorder.save();
+        //recorder.endRecord();
+        //recorder.save();
+        start = false;
         status= "paused";
         trialCount++;
         timeElapsed = 0;
