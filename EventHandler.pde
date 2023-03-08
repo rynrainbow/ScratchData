@@ -44,9 +44,8 @@ synchronized public void handleButtonEvents(GButton button, GEvent event){
     if(button == rec_resume){
       if(status.equals("paused") && trialCount < NTRIALS){
         status = "ongoing";
-        fileName = colPath + DIRDELIM + currentGest + trialCount + AUDIOEXT;
-        //recorder = minim.createRecorder(in, fileName);
-        //recorder.beginRecord();
+        //fileName = colPath + DIRDELIM + currentGest + trialCount + AUDIOEXT;
+        fileName = colPath + DIRDELIM + currentGest + AUDIOEXT;
         
         // create and start recording thread
         // start recording
@@ -57,11 +56,7 @@ synchronized public void handleButtonEvents(GButton button, GEvent event){
       }
     }
     if(button == rec_restart){
-      if(status.equals("ongoing")){
-        //clean finish recorder's process
-        //recorder.endRecord();
-        //recorder.save();
-        
+      if(status.equals("ongoing")){        
         //stop recording
         start = false;
         //reset some variables
@@ -75,7 +70,8 @@ synchronized public void handleButtonEvents(GButton button, GEvent event){
         //retract counter
         trialCount--;
         if(trialCount >= 0){
-          // if sessionCount valid, delete the pointed file
+          // if trialCount valid, delete the pointed file
+          // Cannot redo a previously completed gesture!!
           deleteCurrentFile();
         }else{
           // illegal, reset to 0
@@ -103,7 +99,8 @@ synchronized public void handleButtonEvents(GButton button, GEvent event){
 }
 
 boolean deleteCurrentFile(){
-  String fileName = colPath + DIRDELIM + currentGest + trialCount + AUDIOEXT;
+  //String fileName = colPath + DIRDELIM + currentGest + trialCount + AUDIOEXT;
+  String fileName = colPath + DIRDELIM + currentGest + AUDIOEXT;
   File toBeDeleted = new File(fileName);
   if(toBeDeleted.exists()) {
     toBeDeleted.delete();

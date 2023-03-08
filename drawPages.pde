@@ -47,7 +47,7 @@ public void drawRecord(){
     //String sessionName = sessionList.get(sessionCount);
     //String gesture = sessionName.substring(0, sessionName.length() - 1);
     String trialProgress = trialCount + "/" + NTRIALS;
-    text("Trial "+ trialProgress +":please repeat gesture " + currentGest + " for 20 seconds", 250, 90);
+    text("Trial "+ trialProgress +":please repeat gesture " + currentGest + " for " + DURATION/1000 + " seconds", 250, 90);
   }else text("You can click next now!", 250, 90);
   
   // status
@@ -108,7 +108,7 @@ void displayShape(){
     //println(map(dataPlot[i], 0, 3000, height*0.3, height*0.7));
     vertex(
       map(i, 0, plotSize, 0.1*width, 0.9*width),
-      map(dataPlot[i], 500, 3000, height*0.3, height*0.7)
+      map(dataPlot[i], 3000, 500, height*0.3, height*0.7)
     );
   }
   endShape();

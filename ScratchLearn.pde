@@ -38,7 +38,7 @@ int plotSize = sampleRate / 2;
 int[] dataPlot;
 Movie myMovie;
 
-final int DURATION = 20000; // 20 seconds
+final int DURATION = 15000; // 15 seconds
 final String AUDIOEXT = ".wav";
 final String VIDEOEXT = ".mp4";
 final String DELIMITER = "_";
@@ -54,7 +54,7 @@ PFont light;
 PFont bold;
 
 ArrayList<Integer> gestOrder;
-int nGestPast = 0;
+int nGestPast = 0; 
 String currentGest;
 int pageIdx;
 String colPath;
