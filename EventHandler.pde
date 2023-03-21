@@ -124,7 +124,6 @@ void recording(){
   byte[] byteBuffer = new byte[dataRec.size()];
   for(int i=0; i<dataRec.size(); i++) byteBuffer[i] = dataRec.get(i);
   
-  //TODO: store the data into wav file
   try{
     File out = new File(fileName); // use the file nanme determined by button callback function
     AudioFormat format = new AudioFormat((float)sampleRate, bitWidth, channelNum, signed, bigEndian); // 
@@ -134,6 +133,13 @@ void recording(){
     audioInputStream.close();
   }catch(Exception e){
     print(e.toString());
+  }
+  
+  // extra work to show background threshold
+  if(currentGest.equals("Background")){
+    SoundFile back = new SoundFile(this, fileName);
+    Threshold thr = new Threshold(back, (float)sampleRate);
+    print(thr.returnThreshold());
   }
 }
 

@@ -1,7 +1,6 @@
 import g4p_controls.*;
 import ddf.minim.*;
 import java.io.*;
-//import processing.sound.*;
 import processing.video.*;
 import java.util.*;
 import processing.net.*;
@@ -20,7 +19,7 @@ boolean start;
 
 // audio data related
 ArrayList<Byte> dataRec;
-int sampleRate = 12000;
+int sampleRate = 8000;   // previously 12000
 int bitWidth = 16;
 int channelNum = 1;
 boolean signed = true;
@@ -48,6 +47,9 @@ final String[] GESTURES = {"Background", "KN_flick", "KN_click", "KP_rub",
                           "KP_click", "NN_rub", "NN_click", "NP_rub", "NP_flick", 
                           "NP_click", "PK_rub", "PK_click", "PN_rub", "PN_flick", 
                           "PN_click", "PP_rub", "PP_flick", "PP_click"}; 
+//final String[] GESTURES = {"Background", "KP_rub", "NP_flick", "NP_rub", "PK_rub", 
+//                           "PN_flick", "PP_flick", "PP_rub"};
+
 //final String[] SHORTHAND = {"idf", "snp", "aflk"};
 final int NTRIALS = 1;
 PFont light;
@@ -70,14 +72,8 @@ public void setup(){
   bold = createFont("Roboto-Bold.ttf", 10);
   textFont(light); // set initial font
   
-  // init sessionList
-  //initSessionList();
-  // config Audio input
-  //minim = new Minim(this);
-  //in = minim.getLineIn(Minim.MONO, 9600, 96000, 16);  // a big buffer size?
-  
   // config WIFI
-  mServer = new Server(this, PORT, HOST);
+  mServer = new Server(this, PORT, HOST); //<>//
   while(mESP32 == null){
     mESP32 = mServer.available();
   }
