@@ -7,6 +7,7 @@ GTextArea wel_ID;
 GTextArea wel_age;
 GTextArea wel_gender;
 GButton wel_confirm;
+GButton wel_learn;
 
 // controllers in recording page
 GGroup recordPage;
@@ -26,10 +27,11 @@ public void initAllControls(){
   wel_age_lab = new GLabel(this, 350, 210, 50, 40, "age:");
   wel_gender_lab = new GLabel(this, 350, 270, 50, 40, "gender:");
   
-  wel_confirm = new GButton(this, 450, 350, 100, 30, "confirm");
+  wel_confirm = new GButton(this, 350, 350, 100, 30, "collect");
+  wel_learn = new GButton(this, 500, 350, 100, 30, "learn");
   welcomePage = new GGroup(this);
-  welcomePage.addControls(wel_ID, wel_age, wel_gender,
-                          wel_ID_lab, wel_age_lab, wel_gender_lab, wel_confirm);
+  welcomePage.addControls(wel_ID, wel_age, wel_gender, wel_ID_lab, 
+                          wel_age_lab, wel_gender_lab, wel_confirm, wel_learn);
   
   lea_ready = new GButton(this, 450, 650, 100, 30, "ready");
   learnPage = new GGroup(this);
@@ -47,7 +49,8 @@ public void initOthers(){
   // random generators here
   // init a gesture order
   gestOrder = new ArrayList<Integer>();
-  for(int i=1; i<GESTURES.length; i++) gestOrder.add(i);
+  for(int i=2; i<GESTURES.length; i++) gestOrder.add(i);
   Collections.shuffle(gestOrder);
+  gestOrder.add(0, 1); // guarantee to collect PP_click second
   gestOrder.add(0, 0); // guarantee to collect background first
 }

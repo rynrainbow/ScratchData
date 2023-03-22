@@ -44,8 +44,6 @@ public void drawRecord(){
   textSize(20);
   fill(0, 0, 0);
   if(trialCount < NTRIALS){
-    //String sessionName = sessionList.get(sessionCount);
-    //String gesture = sessionName.substring(0, sessionName.length() - 1);
     String trialProgress = trialCount + "/" + NTRIALS;
     text("Trial "+ trialProgress +":please repeat gesture " + currentGest + " for " + DURATION/1000 + " seconds", 250, 90);
   }else text("You can click next now!", 250, 90);
@@ -65,12 +63,15 @@ public void drawRecord(){
   text("session time: "+ transformed, 850, 670);
   
   // display wave form
-  if(status == "ongoing"){
+  if(status.equals("ongoing")){
     displayShape();
-    //strokeWeight(1.5);
-    //stroke(0, 100, 200);
-    //line(0.2*width, 220, 0.8*width, 220);  // low bound
-    //line(0.2*width, 100, 0.8*width, 100);  // high bound
+  }
+  // display threshold result
+  if(currentGest.equals("Background")){
+    String threshold = String.format("%.6f", bckThreshold);
+    textSize(15);
+    fill(0, 0, 0);
+    text("Background threshold: "+ threshold, 450, 670);
   }
 }
 
@@ -78,17 +79,6 @@ void displayShape(){
   stroke(0);
   strokeWeight(1.5);
   noFill();
-  
-  //beginShape();
-  ////float[] monoPiece = in.left.toArray();
-  //for(int i = 0; i < in.bufferSize(); i+=2)
-  //{
-  //  vertex(
-  //    map(i, 0, in.bufferSize(), 0.2*width, 0.8*width),
-  //    map(in.left.get(i), -0.07, 0.07, height*0.25, height*0.75)
-  //  );
-  //}
-  //endShape();
   
   synchronized (lock){
     int bufferSize = dataRec.size();
@@ -104,8 +94,6 @@ void displayShape(){
   // draw a incomplete dataPlot array?
   beginShape();  
   for(int i = 0; i< plotSize; i++){
-    //println(dataPlot[i]);
-    //println(map(dataPlot[i], 0, 3000, height*0.3, height*0.7));
     vertex(
       map(i, 0, plotSize, 0.1*width, 0.9*width),
       map(dataPlot[i], 3000, 500, height*0.3, height*0.7)

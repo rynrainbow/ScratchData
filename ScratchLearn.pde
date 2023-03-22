@@ -5,11 +5,6 @@ import processing.video.*;
 import java.util.*;
 import processing.net.*;
 
-// for progressing
-//Minim minim;
-//AudioInput in;
-//AudioRecorder recorder;
-
 // network related
 Server mServer;
 int PORT = 2333;
@@ -29,28 +24,26 @@ String fileName= "";
 // UI related
 int timeStamp;
 int timeElapsed;
-//ArrayList<String> sessionList;
 int trialCount = 0;  // counting how many trials have been done
 ProgressBar mProgressBar;
 String status;
 int plotSize = sampleRate / 2;
 int[] dataPlot;
 Movie myMovie;
+float bckThreshold = 0;
 
-final int DURATION = 15000; // 15 seconds
+int DURATION = 15000; // 15 seconds
+final int REDUCED = 10000; // 10 seconds for learning
 final String AUDIOEXT = ".wav";
 final String VIDEOEXT = ".mp4";
 final String DELIMITER = "_";
 final String DIRDELIM = "/";
 final String SAVEPATH = "/Users/rylan.reborn/Processing/ScratchLearn/Data Collection";
-final String[] GESTURES = {"Background", "KN_flick", "KN_click", "KP_rub",
+final String[] GESTURES = {"Background", "PP_click", "KN_flick", "KN_click", "KP_rub",
                           "KP_click", "NN_rub", "NN_click", "NP_rub", "NP_flick", 
                           "NP_click", "PK_rub", "PK_click", "PN_rub", "PN_flick", 
-                          "PN_click", "PP_rub", "PP_flick", "PP_click"}; 
-//final String[] GESTURES = {"Background", "KP_rub", "NP_flick", "NP_rub", "PK_rub", 
-//                           "PN_flick", "PP_flick", "PP_rub"};
-
-//final String[] SHORTHAND = {"idf", "snp", "aflk"};
+                          "PN_click", "PP_rub", "PP_flick"}; 
+//final String[] GESTURES = {"Background", "PN_rub", "KN_click"};
 final int NTRIALS = 1;
 PFont light;
 PFont bold;
@@ -73,7 +66,7 @@ public void setup(){
   textFont(light); // set initial font
   
   // config WIFI
-  mServer = new Server(this, PORT, HOST); //<>//
+  mServer = new Server(this, PORT, HOST);
   while(mESP32 == null){
     mESP32 = mServer.available();
   }

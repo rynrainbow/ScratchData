@@ -11,10 +11,11 @@ public void handleTextEvents(GEditableTextControl textcontrol, GEvent event){
 
 synchronized public void handleButtonEvents(GButton button, GEvent event){
   if(event == GEvent.CLICKED){
-    if(button == wel_confirm){
+    if(button == wel_confirm || button == wel_learn){
+      if(button == wel_learn) DURATION = REDUCED;
       // read info from textArea
-      userTag = wel_ID.getText(0) + DELIMITER + wel_gender.getText(0) + DELIMITER + wel_age.getText(0);
       // create a subfolder according to userTag
+      userTag = wel_ID.getText(0) + DELIMITER + wel_gender.getText(0) + DELIMITER + wel_age.getText(0);
       colPath = SAVEPATH + DIRDELIM + userTag;
       File directory = new File(colPath);
       if(!directory.exists()) directory.mkdir();
@@ -136,10 +137,11 @@ void recording(){
   }
   
   // extra work to show background threshold
-  if(currentGest.equals("Background")){
-    SoundFile back = new SoundFile(this, fileName);
+  if(currentGest.equals("Background") && new File(fileName).exists()){ //<>//
+    SoundFile back = new SoundFile(this, fileName, false);
     Threshold thr = new Threshold(back, (float)sampleRate);
-    print(thr.returnThreshold());
+    bckThreshold = thr.returnThreshold();
+    println(String.format("%.6f", bckThreshold));
   }
 }
 

@@ -9,10 +9,13 @@ class Threshold{
   private final float startTime = 0.5;
   private final float nSigma = 3;
   private float[] rms;
+  // this is a 4-cascaded-biquad highpass filter
+  // 7 order with 5Hz as cutoff, stopband 80dB, chebyII
   private final float[][] sos = {{0.98305942f, -0.98305942f, 0f, 1f, -0.99242492f,          0f},
                                  {         1f,  -1.9999971f, 1f, 1f, -1.98633141f, 0.98639172f},
                                  {         1f, -1.99999057f, 1f, 1f, -1.99049609f, 0.99056302f},
                                  {         1f, -1.99998534f, 1f, 1f, -1.99654938f, 0.99662173f}};
+                                 
   public float[] bg;
   public float fs;
   
