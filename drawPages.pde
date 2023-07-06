@@ -46,7 +46,8 @@ public void drawRecord(){
   if(trialCount < NTRIALS){
     String trialProgress = trialCount + "/" + NTRIALS;
     text("Trial "+ trialProgress +":please repeat gesture " + currentGest + " for " + DURATION/1000 + " seconds", 250, 90);
-  }else text("You can click next now!", 250, 90);
+  }else
+    text("You can click next now!", 250, 90);
   
   // status
   textSize(15);
@@ -61,6 +62,18 @@ public void drawRecord(){
   fill(0, 0, 0);
   int transformed = timeElapsed / 1000;
   text("session time: "+ transformed, 850, 670);
+  
+  // WIFI connection indicator
+  textSize(15);
+  text("WIFI: ", 10, 120);
+  if(mESP32 != null){
+    fill(0, 255, 0);
+    text("connected", 60, 120);
+  }  
+  else{
+    fill(255, 0, 0);
+    text("disconnected", 60, 120);
+  }
   
   // display wave form
   if(status.equals("ongoing")){
@@ -98,6 +111,8 @@ void displayShape(){
       map(i, 0, plotSize, 0.1*width, 0.9*width),
       map(dataPlot[i], 3000, 500, height*0.3, height*0.7)
     );
+    // debugging
+    //println(dataPlot[i]);
   }
   endShape();
 }

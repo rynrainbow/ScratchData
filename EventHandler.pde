@@ -43,7 +43,7 @@ synchronized public void handleButtonEvents(GButton button, GEvent event){
       status = "paused";
     }
     if(button == rec_resume){
-      if(status.equals("paused") && trialCount < NTRIALS){
+      if(status.equals("paused") && trialCount < NTRIALS && mESP32 != null){
         status = "ongoing";
         //fileName = colPath + DIRDELIM + currentGest + trialCount + AUDIOEXT;
         fileName = colPath + DIRDELIM + currentGest + AUDIOEXT;
@@ -114,8 +114,11 @@ void recording(){
   mESP32.clear(); // clear all unusable data
   dataRec.clear();  // clear old data
   while(start){
+    int count = 0;
     byte[] read = new byte[1024];  // may need to increase??
-    int count = mESP32.readBytes(read);
+    // ensure the WIFI connnection is still on
+    if(mESP32 != null)
+      count = mESP32.readBytes(read);
     // synchronization with displayshape()
     synchronized (lock){
       savingBytes(read, count);

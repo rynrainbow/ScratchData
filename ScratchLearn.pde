@@ -11,6 +11,7 @@ int PORT = 2333;
 String HOST = "192.168.0.162";
 Client mESP32 = null;
 boolean start;
+//boolean connected;
 
 // audio data related
 ArrayList<Byte> dataRec;
@@ -32,7 +33,7 @@ int[] dataPlot;
 Movie myMovie;
 float bckThreshold = 0;
 
-int DURATION = 15000; // 15 seconds
+int DURATION = 60000; // 15 seconds
 final int REDUCED = 10000; // 10 seconds for learning
 final String AUDIOEXT = ".wav";
 final String VIDEOEXT = ".mp4";
@@ -43,7 +44,6 @@ final String[] GESTURES = {"Background", "PP_click", "KN_flick", "KN_click", "KP
                           "KP_click", "NN_rub", "NN_click", "NP_rub", "NP_flick", 
                           "NP_click", "PK_rub", "PK_click", "PN_rub", "PN_flick", 
                           "PN_click", "PP_rub", "PP_flick"}; 
-//final String[] GESTURES = {"Background", "PN_rub", "KN_click"};
 final int NTRIALS = 1;
 PFont light;
 PFont bold;
@@ -65,12 +65,10 @@ public void setup(){
   bold = createFont("Roboto-Bold.ttf", 10);
   textFont(light); // set initial font
   
-  // config WIFI
+    // config WIFI
   mServer = new Server(this, PORT, HOST);
-  while(mESP32 == null){
-    mESP32 = mServer.available();
-  }
   start = false;
+  //connected =false;
   
   // config data collection and plotting
   dataRec = new ArrayList<Byte>(0);
@@ -90,6 +88,7 @@ public void setup(){
 
 public void draw(){
   background(255, 255, 255);
+  clientCheck();
   timerCheck();
   if(pageIdx == 0) drawWelcome();
   // for testing, play a test video
@@ -101,7 +100,8 @@ public void draw(){
 public void timerCheck(){
   if(status.equals("ongoing")){
     timeElapsed = millis() - timeStamp;
-    if(timeElapsed > DURATION){
+    // recording timeout or WIFI connection down
+    if(timeElapsed > DURATION || mESP32 == null){
         //recorder.endRecord();
         //recorder.save();
         start = false;
@@ -109,6 +109,20 @@ public void timerCheck(){
         trialCount++;
         timeElapsed = 0;
     }
+  }
+}
+
+public void clientCheck(){
+  if(mESP32 == null){
+    Client poClient = mServer.available();
+    // Any incoming client will overwrite the client socket "mESP32"
+    // Thus after a connection is down, the next will replace
+    if(poClient != null){
+      mESP32 = poClient;
+    }
+  }
+  else{
+    if(!mESP32.active()) mESP32 = null;
   }
 }
 
