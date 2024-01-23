@@ -111,6 +111,8 @@ boolean deleteCurrentFile(){
 }
 
 void recording(){
+  // WIFI delay buffering test
+  // do not clear previous stored data
   mESP32.clear(); // clear all unusable data
   dataRec.clear();  // clear old data
   while(start){

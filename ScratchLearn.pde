@@ -1,5 +1,4 @@
 import g4p_controls.*;
-import ddf.minim.*;
 import java.io.*;
 import processing.video.*;
 import java.util.*;
@@ -11,7 +10,6 @@ int PORT = 2333;
 String HOST = "192.168.0.162";
 Client mESP32 = null;
 boolean start;
-//boolean connected;
 
 // audio data related
 ArrayList<Byte> dataRec;
@@ -33,17 +31,20 @@ int[] dataPlot;
 Movie myMovie;
 float bckThreshold = 0;
 
-int DURATION = 60000; // 15 seconds
+int DURATION = 15000; // 15 seconds
 final int REDUCED = 10000; // 10 seconds for learning
 final String AUDIOEXT = ".wav";
 final String VIDEOEXT = ".mp4";
 final String DELIMITER = "_";
 final String DIRDELIM = "/";
 final String SAVEPATH = "/Users/rylan.reborn/Processing/ScratchLearn/Data Collection";
-final String[] GESTURES = {"Background", "PP_click", "KN_flick", "KN_click", "KP_rub",
-                          "KP_click", "NN_rub", "NN_click", "NP_rub", "NP_flick", 
-                          "NP_click", "PK_rub", "PK_click", "PN_rub", "PN_flick", 
-                          "PN_click", "PP_rub", "PP_flick"}; 
+//final String[] GESTURES = {"Background", "PP_click", "KN_click", "NN_rub", 
+//                          "NP_flick", "NP_click", "PN_rub", "PN_flick", 
+//                          "PN_click", "PP_rub", "PP_flick"}; 
+
+final String[] GESTURES = {"Background", "PP_click", "PP_rub", "PP_flick", "PN_click", "PK_click",
+                          "NP_rub", "NN_rub", "KP_rub", "KP_click", "KN_flick", "KN_click", "PK_rub",
+                          "PN_rub", "PN_flick", "NP_flick", "NP_click", "NN_click"};
 final int NTRIALS = 1;
 PFont light;
 PFont bold;

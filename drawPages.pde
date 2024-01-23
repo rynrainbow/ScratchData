@@ -97,6 +97,7 @@ void displayShape(){
     int bufferSize = dataRec.size();
     if(bufferSize > (plotSize * 2)){ // 16bit int
       for(int i=0; i < plotSize; i++){
+        // plot the most recent frames
         byte MSB = dataRec.get(bufferSize - 2 * (plotSize - i));
         byte LSB = dataRec.get(bufferSize - 2 * (plotSize - i) + 1);
         dataPlot[i] = ((MSB & 0xff)<< 8) + (LSB & 0xff);   // to get unsigned int!!!
