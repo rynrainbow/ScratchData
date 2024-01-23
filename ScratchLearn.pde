@@ -7,7 +7,8 @@ import processing.net.*;
 // network related
 Server mServer;
 int PORT = 2333;
-String HOST = "192.168.0.162";
+//String HOST = "192.168.0.162";
+String HOST = "192.168.0.24";
 Client mESP32 = null;
 boolean start;
 
@@ -129,13 +130,16 @@ public void clientCheck(){
 
 public void movieEvent(Movie movie) {
   movie.read();
+   if (movie.time() == movie.duration()) {
+    movie.jump(0);  // Jump to the beginning when the video reaches the end
+  }
 }
 
-public void keyPressed(){
-  //if(key == 'c' || key == 'C'){ 
-  //  if(status == null || status == "paused") {
-  //    println("exit the program!");
-  //    exit();
-  //  }
-  //}
+public void exit(){
+  if(mServer != null){
+    mServer.stop();
+    mServer = null;
+  }
+  println("properly closed!");
+  super.exit();
 }
