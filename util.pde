@@ -1,5 +1,3 @@
-import processing.sound.*;
-
 // a background processing part
 class Threshold{
   private final float calib = 2100;
@@ -20,14 +18,13 @@ class Threshold{
   public float fs;
   
   // read the float data and scale
-  public Threshold(SoundFile bgFile, float fs){
+  public Threshold(float[] bg_raw, float fs){
     this.fs = fs;
-    int numFrames = bgFile.frames();
-    bg = new float[numFrames];
-    bgFile.read(bg);
+    int n = bg_raw.length;
+    bg = new float[n];
     // do scaling based on calib
-    for(int i=0; i<numFrames; i++){
-      bg[i] = (bg[i] * 32768f - this.calib) / this.scaler;
+    for(int i=0; i < n; i++){ //<>//
+      bg[i] = (bg_raw[i] - this.calib) / this.scaler;
     }
   }
   

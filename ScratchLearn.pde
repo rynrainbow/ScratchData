@@ -38,10 +38,7 @@ final String AUDIOEXT = ".wav";
 final String VIDEOEXT = ".mp4";
 final String DELIMITER = "_";
 final String DIRDELIM = "/";
-final String SAVEPATH = "/Users/rylan.reborn/Processing/ScratchLearn/Data Collection";
-//final String[] GESTURES = {"Background", "PP_click", "KN_click", "NN_rub", 
-//                          "NP_flick", "NP_click", "PN_rub", "PN_flick", 
-//                          "PN_click", "PP_rub", "PP_flick"}; 
+final String SAVEPATH = "E:/BU projects/Processing Proj/ScratchLearn/Data_collection";  // path on mac /Users/rylan.reborn/Processing/ScratchLearn/Data Collection
 
 final String[] GESTURES = {"Background", "PP_click", "PP_rub", "PP_flick", "PN_click", "PK_click",
                           "NP_rub", "NN_rub", "KP_rub", "KP_click", "KN_flick", "KN_click", "PK_rub",
@@ -57,8 +54,8 @@ int pageIdx;
 String colPath;
 String userTag;
 
-// a lock between data collection and plotting
-Object lock = new Object();
+Object lock = new Object(); // a lock between data collection and plotting
+Object fileLock = new Object(); // a lock between file creation and deletion
 
 public void setup(){
   size(1000, 700);

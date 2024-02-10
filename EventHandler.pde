@@ -15,10 +15,16 @@ synchronized public void handleButtonEvents(GButton button, GEvent event){
       if(button == wel_learn) DURATION = REDUCED;
       // read info from textArea
       // create a subfolder according to userTag
-      userTag = wel_ID.getText(0) + DELIMITER + wel_gender.getText(0) + DELIMITER + wel_age.getText(0);
+      String name=""; String gender=""; String age="";
+      if(!wel_ID.getText(0).equals(" ")) name = wel_ID.getText(0);
+      if(!wel_gender.getText(0).equals(" ")) gender = wel_gender.getText(0);
+      if(!wel_age.getText(0).equals(" ")) age = wel_age.getText(0);
+      userTag = name + DELIMITER + gender + DELIMITER + age;
       colPath = SAVEPATH + DIRDELIM + userTag;
       File directory = new File(colPath);
-      if(!directory.exists()) directory.mkdir();
+      if(!directory.exists()){
+        directory.mkdirs();
+      }
       
       // go to gesture learn page
       pageIdx = 1;
@@ -66,6 +72,7 @@ synchronized public void handleButtonEvents(GButton button, GEvent event){
         //delete the saved file
         //ensure the recording finishes first
         while(!deleteCurrentFile());
+        println("successfully deleted!");
       }
       else if(status.equals("paused")){
         //retract counter
@@ -101,13 +108,14 @@ synchronized public void handleButtonEvents(GButton button, GEvent event){
 
 boolean deleteCurrentFile(){
   //String fileName = colPath + DIRDELIM + currentGest + trialCount + AUDIOEXT;
-  String fileName = colPath + DIRDELIM + currentGest + AUDIOEXT;
-  File toBeDeleted = new File(fileName);
-  if(toBeDeleted.exists()) {
-    toBeDeleted.delete();
-    return true;
+  //String fileName = colPath + DIRDELIM + currentGest + AUDIOEXT;
+  synchronized(fileLock){
+    File toBeDeleted = new File(fileName);
+    if(toBeDeleted.exists()) {
+      return toBeDeleted.delete();
+    }
+    else return false;
   }
-  else return false;
 }
 
 void recording(){
@@ -130,21 +138,33 @@ void recording(){
   byte[] byteBuffer = new byte[dataRec.size()];
   for(int i=0; i<dataRec.size(); i++) byteBuffer[i] = dataRec.get(i);
   
-  try{
-    File out = new File(fileName); // use the file nanme determined by button callback function
-    AudioFormat format = new AudioFormat((float)sampleRate, bitWidth, channelNum, signed, bigEndian); // 
-    ByteArrayInputStream bais = new ByteArrayInputStream(byteBuffer);
-    AudioInputStream audioInputStream = new AudioInputStream(bais, format, (int)(dataRec.size()/2));  // sample length of the data
-    AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, out);
-    audioInputStream.close();
-  }catch(Exception e){
-    print(e.toString());
+  synchronized(fileLock){
+    try{
+      File out = new File(fileName); // use the file nanme determined by button callback function
+      if(!out.getParentFile().exists()){
+        out.getParentFile().mkdirs();
+      }
+      AudioFormat format = new AudioFormat((float)sampleRate, bitWidth, channelNum, signed, bigEndian); // 
+      ByteArrayInputStream bais = new ByteArrayInputStream(byteBuffer);
+      AudioInputStream audioInputStream = new AudioInputStream(bais, format, (int)(dataRec.size()/2));  // sample length of the data
+      AudioSystem.write(audioInputStream, AudioFileFormat.Type.WAVE, out);
+      audioInputStream.close();
+    }catch(Exception e){
+      print(e.toString());
+    }
   }
-  
+    
   // extra work to show background threshold
-  if(currentGest.equals("Background") && new File(fileName).exists()){ //<>//
-    SoundFile back = new SoundFile(this, fileName, false);
-    Threshold thr = new Threshold(back, (float)sampleRate);
+  if(currentGest.equals("Background") && byteBuffer.length > 0){ 
+    int n_points = (int) (byteBuffer.length / 2);
+    float[] back_raw = new float[n_points];
+    for(int i=0; i < n_points; i++){
+      // assemble bytes to floats
+      byte MSB = byteBuffer[2 * i];
+      byte LSB = byteBuffer[2 * i + 1];
+      back_raw[i] = (float)(((MSB & 0xff)<< 8) + (LSB & 0xff));   // to get unsigned int!!!
+    }
+    Threshold thr = new Threshold(back_raw, (float)sampleRate); //<>//
     bckThreshold = thr.returnThreshold();
     println(String.format("%.6f", bckThreshold));
   }
