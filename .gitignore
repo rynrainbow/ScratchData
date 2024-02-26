@@ -1,5 +1,5 @@
 *.wav
-*.mp4
 Data Collection/
 Data_collection/
 .DS_Store
+data/
